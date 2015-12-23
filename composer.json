@@ -1,15 +1,20 @@
 {
     "name": "dkhru/yii2-image-store",
-    "description": "Component for store images",
+    "description": "Component for store all images in project as simple capacity save way.",
     "type": "yii2-extension",
-    "keywords": ["yii2","extension"],
-    "license": "GPL-2.0",
+    "keywords": ["yii2","extension","image", "store", "save", "capacity", "dkh", "dkhru"],
+    "license": "BSD-3-Clause",
     "authors": [
         {
             "name": "Dmitriy Khristianov",
-            "email": "support@dkh.ru"
+            "email": "support@dkh.ru",
+            "homepage": "http://dkh.ru"
         }
     ],
+    "support": {
+        "issues": "https://github.com/dkhru/yii2-image-store/issues?state=open",
+        "source": "https://github.com/dkhru/yii2-image-store"
+    },
     "require": {
         "yiisoft/yii2": "*"
     },
@@ -17,5 +22,8 @@
         "psr-4": {
             "dkhru\\imageStore\\": ""
         }
+    },
+    "extra": {
+        "bootstrap": "dkhru\\imageStore\\Bootstrap"
     }
 }
