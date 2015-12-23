@@ -1,0 +1,21 @@
+{
+    "name": "dkhru/yii2-image-store",
+    "description": "Component for store images",
+    "type": "yii2-extension",
+    "keywords": ["yii2","extension"],
+    "license": "GPL-2.0",
+    "authors": [
+        {
+            "name": "Dmitriy Khristianov",
+            "email": "support@dkh.ru"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "dkhru\\imageStore\\": ""
+        }
+    }
+}
