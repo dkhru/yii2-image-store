@@ -55,7 +55,7 @@
             'size'=>Schema::TYPE_INTEGER . ' UNSIGNED NOT NULL',
          ], $tableOptions);
          $this->addPrimaryKey('pk_dkh_image_variant',$tn,['image_id','variant_id']);
-         $this->addForeignKey('fk_dkh_image_variant_image_id', $tn, 'image_id', '{{%dkh_image}}', 'id');
+         $this->addForeignKey('fk_dkh_image_variant_image_id', $tn, 'image_id', '{{%dkh_image}}', 'id','CASCADE');
          $this->addForeignKey('fk_dkh_image_variant_variant_id', $tn, 'variant_id', '{{%dkh_variant}}', 'id');
 
 //        ImageStore table
@@ -68,7 +68,7 @@
             'size'=>Schema::TYPE_INTEGER . ' UNSIGNED NOT NULL',
          ], $tableOptions);
          $this->addPrimaryKey('pk_dkh_image_store',$tn,['image_id','store_id']);
-         $this->addForeignKey('fk_dkh_image_store_image_id', $tn, 'image_id', '{{%dkh_image}}', 'id');
+         $this->addForeignKey('fk_dkh_image_store_image_id', $tn, 'image_id', '{{%dkh_image}}', 'id','CASCADE');
          $this->addForeignKey('fk_dkh_image_store_store_id', $tn, 'store_id', '{{%dkh_store}}', 'id');
 
       }

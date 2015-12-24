@@ -235,7 +235,7 @@
       private static function createFK($table, $field)
       {
          $fk='fk_' . $table . '_' . $field;
-         $sql=Yii::$app->db->queryBuilder->addForeignKey($fk, $table, $field, Image::getTableSchema()->name, 'id');
+         $sql=Yii::$app->db->queryBuilder->addForeignKey($fk, $table, $field, Image::getTableSchema()->name, 'id','CASCADE');
          $trans=Yii::$app->db->beginTransaction(Transaction::REPEATABLE_READ);
          try{
             Yii::$app->db->createCommand('SET FOREIGN_KEY_CHECKS = 0;')->execute();
