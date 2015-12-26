@@ -94,16 +94,15 @@
                // converted on init
                $variants=$field[ 'variants' ];
             }
-            if(!$this->owner->isNewRecord)
-               if( isset( $this->owner->{$fieldName} ) ){
-                  $old_id = $this->owner->{$fieldName};
-                  $this->owner->{$fieldName} = null;
-                  $this->owner->save(false);
-                  $this->iStore->deleteImage($old_id, $field[ 'store_id' ]);
-               }
+//            if(!$this->owner->isNewRecord)
+//               if( isset( $this->owner->{$fieldName} ) ){
+//                  $old_id = $this->owner->{$fieldName};
+//                  $this->owner->{$fieldName} = null;
+//                  $this->owner->save(false);
+//                  $this->iStore->deleteImage($old_id, $field[ 'store_id' ]);
+//               }
             $image = $this->iStore->saveImage($file, $field['store_id'],$variants,false);
             $this->owner->{$fieldName} = $image->id;
-            return $this->owner->save();
          }
 
       }

@@ -5,7 +5,6 @@
    use dkhru\imageStore\components\ImageStore;
    use Yii;
    use yii\db\ActiveRecord;
-   use yii\helpers\FileHelper;
    use yii\helpers\Url;
 
    /**
@@ -38,7 +37,7 @@
       public function events()
       {
          return [
-            ActiveRecord::EVENT_BEFORE_DELETE=> 'beforeDeleteImage',
+            ActiveRecord::EVENT_BEFORE_DELETE=>'beforeDeleteImage',
          ];
       }
 
@@ -103,64 +102,111 @@
          return $this->hasMany(Variant::className(), [ 'id'=>'variant_id' ])->viaTable('{{%dkh_image_variant}}', [ 'image_id'=>'id' ]);
       }
 
-      public function getFileName($variant_id=null, $public=false){
-         $res = (($public===false)?$this->iStore->storePath:$this->iStore->publicPath).DIRECTORY_SEPARATOR.$this->hash;
-         if (isset($variant_id))
-            $res .= ImageStore::VARIANT_SEPARATOR.$variant_id;
-         $res .= '.'.$this->ext;
+      public function getFileName($variant_id=null, $public=false)
+      {
+         $res=( ( $public === false ) ? $this->iStore->storePath : $this->iStore->publicPath ) . DIRECTORY_SEPARATOR . $this->hash;
+         if( isset( $variant_id ) )
+            $res .= ImageStore::VARIANT_SEPARATOR . $variant_id;
+         $res .= '.' . $this->ext;
          return $res;
       }
 
-      public function getEmtyFileName($variant_id){
-         return $this->iStore->storePath.DIRECTORY_SEPARATOR.$this->iStore->getEmptyFileName($variant_id);
+
+
+      public function getEmtyFileName($variant_id)
+      {
+         return $this->iStore->storePath . DIRECTORY_SEPARATOR . $this->iStore->getEmptyFileName($variant_id);
       }
 
-      public function getLinksCount(){
+      public function getEmtyUrl($variant_id)
+      {
+         return $this->iStore->publicUrl . DIRECTORY_SEPARATOR . $this->iStore->getEmptyFileName($variant_id);
+      }
+
+      public function getLinksCount()
+      {
          $stores=$this->stores;
-         $res=[];
+         $res=[ ];
          $cnt=0;
          /** @var Store $store */
          foreach( $stores as $store ){
             $sql=<<<SQL
 SELECT count(*) from $store->table where $store->field = :id
 SQL;
-            $res[$store->id]=Yii::$app->db->createCommand($sql, [ ':id'=>$this->id ])->queryScalar();
-            $cnt +=$res[$store->id];
+            $res[ $store->id ]=Yii::$app->db->createCommand($sql, [ ':id'=>$this->id ])->queryScalar();
+            $cnt+=$res[ $store->id ];
          }
-         $res['total'] =$cnt;
+         $res[ 'total' ]=$cnt;
          return $res;
       }
 
-      public function beforeDeleteImage(){
-         array_map("unlink", glob($this->iStore->publicPath.DIRECTORY_SEPARATOR.$this->hash.'*'));
-         array_map("unlink", glob($this->iStore->storePath.DIRECTORY_SEPARATOR.$this->hash.'*'));
+      public function beforeDeleteImage()
+      {
+         array_map("unlink", glob($this->iStore->publicPath . DIRECTORY_SEPARATOR . $this->hash . '*'));
+         array_map("unlink", glob($this->iStore->storePath . DIRECTORY_SEPARATOR . $this->hash . '*'));
          $this->unlinkAll('variants');
          $this->unlinkAll('stores');
          return true;
       }
 
-      private function publicateVariant($variant_id){
-         symlink($this->getFileName($variant_id), $this->getFileName($variant_id,true));
+      private function publicateVariant($variant_id=null)
+      {
+         $fn=$this->getFileName($variant_id);
+         $pfn=$this->getFileName($variant_id, true);
+         if( file_exists($fn) && ( !file_exists($pfn) ) )
+            symlink($fn,$pfn);
       }
 
-      public function publicate($variant_id=null){
-         if(isset($variant_id)){
+      private function unpublicateVariant($variant_id=null)
+      {
+         $fn=$this->getFileName($variant_id, true);
+         if( file_exists($fn) )
+            unlink($fn);
+      }
+
+      public function publicate($variant_id=null)
+      {
+         if( isset( $variant_id ) ){
             $this->publicateVariant($variant_id);
          }else{
+            $this->publicateVariant();
             $variants=$this->variants;
             foreach( $variants as $variant ){
-               $this->publicateVariant($variant_id);
+               $this->publicateVariant($variant->id);
             }
          }
       }
 
-      public function getInternalUrl($variant_id){
-         return Url::to([
-            ImageStore::CONTROLLER_MAP.'/image',
+      public function unpublicate($variant_id=null)
+      {
+         if( isset( $variant_id ) ){
+            $this->unpublicateVariant($variant_id);
+         }else{
+            $this->unpublicateVariant();
+            $variants=$this->variants;
+            foreach( $variants as $variant ){
+               $this->unpublicateVariant($variant->id);
+            }
+         }
+      }
+
+      public function getInternalUrl($variant_id)
+      {
+         return Url::to(
+            [
+               ImageStore::CONTROLLER_MAP . '/image',
                'id'=>$this->id,
                'variant_id'=>$variant_id,
                'ext'=>$this->ext
-         ]);
+            ]);
+      }
+
+      public function getPublicUrl($variant_id)
+      {
+         $fn=$this->hash . ImageStore::VARIANT_SEPARATOR . $variant_id .'.' . $this->ext;
+         $file=$this->iStore->publicPath . DIRECTORY_SEPARATOR . $fn;
+         $url=$this->iStore->publicUrl . "/$fn";
+         return file_exists($file) ? $url : $this->getEmtyUrl($variant_id);
       }
 
    }

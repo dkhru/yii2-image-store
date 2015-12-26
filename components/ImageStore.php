@@ -65,15 +65,26 @@
 
       /** Array of definition models fields whats store image_id
        *    For example:
-       *    fields=>[
-       *       [
-       *          'class'=>ActiveRecord className,
-       *          'field'=>ActiveRecord attribute name,
-       *          'variants'=>field variant @see $this->defaultVariants
-       *       ],
-       *    ]
+       *    models=>[                                        // array of models for attach behavior to
+       *                 [
+       *                    'class'=>\common\models\Image::className(),  // model class
+       *                    'fields'=>[                                  // array of fields in model for store images
+       *                       'image_id'=>[],
+       *                    ],
+       *                 ],
+       *                 [
+       *                    'class'=>\common\models\User::className(),
+       *                    'fields'=>[
+       *                       'avatar_id'=>[
+       *                       'variants'=>[                          // image sizes for field if not set using defaultVariants
+       *                          [ 'width'=>128, 'height'=>128 ],
+       *                       ],
+       *                    ],
+       *                 ],
+       *                ...
+       *              ];
        *
-       * @var
+       * @var array
        */
       public $models;
 
@@ -162,6 +173,8 @@
          }
          if ($new_image===true){
             $store=Store::find()->with('images')->where([ 'id'=>$store_id, ])->one();
+            if ($store===null)
+               throw new Exception('Store not initialized run ./yii istore/init');
             $store->link('images', $image);
          }
          return $image;
