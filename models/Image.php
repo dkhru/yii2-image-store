@@ -5,6 +5,7 @@
    use dkhru\imageStore\components\ImageStore;
    use Yii;
    use yii\db\ActiveRecord;
+   use yii\helpers\FileHelper;
    use yii\helpers\Url;
 
    /**
@@ -34,12 +35,12 @@
          return '{{%dkh_image}}';
       }
 
-      public function events()
+      public function init()
       {
-         return [
-            ActiveRecord::EVENT_BEFORE_DELETE=>'beforeDeleteImage',
-         ];
+         parent::init();
+         $this->on(ActiveRecord::EVENT_BEFORE_DELETE,[$this,'onBeforeDelete']);
       }
+
 
       /**
        * @inheritdoc
@@ -131,7 +132,7 @@
          /** @var Store $store */
          foreach( $stores as $store ){
             $sql=<<<SQL
-SELECT count(*) from $store->table where $store->field = :id
+SELECT count(*) from {$store->table} where {$store->field} = :id
 SQL;
             $res[ $store->id ]=Yii::$app->db->createCommand($sql, [ ':id'=>$this->id ])->queryScalar();
             $cnt+=$res[ $store->id ];
@@ -140,13 +141,20 @@ SQL;
          return $res;
       }
 
-      public function beforeDeleteImage()
+      public function onBeforeDelete($event)
       {
-         array_map("unlink", glob($this->iStore->publicPath . DIRECTORY_SEPARATOR . $this->hash . '*'));
-         array_map("unlink", glob($this->iStore->storePath . DIRECTORY_SEPARATOR . $this->hash . '*'));
-         $this->unlinkAll('variants');
-         $this->unlinkAll('stores');
-         return true;
+         $variants = $this->variants;
+         foreach($variants as $variant){
+            $this->unpublicateVariant($variant->id);
+            $fn=$this->getFileName($variant->id);
+            if(file_exists($fn))
+               unlink($fn);
+         }
+         $fn=$this->getFileName();
+         if(file_exists($fn))
+            unlink($fn);
+//         array_map("unlink", glob($this->iStore->publicPath . DIRECTORY_SEPARATOR . $this->hash . '*'));
+//         array_map("unlink", glob($this->iStore->storePath . DIRECTORY_SEPARATOR . $this->hash . '*'));
       }
 
       private function publicateVariant($variant_id=null)

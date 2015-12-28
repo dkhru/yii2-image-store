@@ -193,11 +193,13 @@
       {
          /** @var Image $image */
          $image = Image::find()->where([ 'id'=>$id ])->one();
-         $cnt = $image->getLinksCount();
-         if($cnt['total']==0){
-            $image->delete();
-         }elseif($cnt[$store_id] == 1){
-            \dkhru\imageStore\models\ImageStore::deleteAll(['image_id'=>$id,'store_id'=>$store_id]);
+         if(isset($image)){
+            $cnt=$image->getLinksCount();
+            if( $cnt[ 'total' ] <= 1 ){
+               $image->delete();
+            }elseif( $cnt[ $store_id ] <= 1 ){
+               \dkhru\imageStore\models\ImageStore::delete([ 'image_id'=>$id, 'store_id'=>$store_id ]);
+            }
          }
       }
 
